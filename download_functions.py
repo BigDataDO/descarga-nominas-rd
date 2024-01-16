@@ -9,27 +9,28 @@ import os
 from requests.auth import HTTPBasicAuth
 from utils import *
 
-df = pd.read_excel('Lista Web Fuentes Nómina Pública.xlsx')
-
+url_sources = pd.read_csv('sources_list.csv')
+df = pd.read_csv('input.csv')
+df = pd.merge(df, url_sources, on='nombre_corto', how='left')
 
 #### Processing Functions ####
 # For each portal, we need to write a function that finds the files to download
 
 def download_sns(df, i):
-    base_url = df['Portal'][i].strip()
-    next_needed_date = df['next_date'][i]
+    base_url = df['portal'][i].strip()
+    next_needed_date = df['query_date'][i]
     next_needed_year, next_needed_month = next_needed_date.split('_')
     next_needed_month_text = month_names_dict[next_needed_month]
     folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
 
     # Open in headless browser
     options = webdriver.FirefoxOptions()
-    options.add_argument("--headless")
+    # options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     try:
-        driver.get(base_url)
+        driver.get('https://indrhi.gob.do/transparencia/recursos-humanos/nominas/')
         # Click the year
-        search_criteria = f"//*[text()='{next_needed_year}']"
+        search_criteria = f"//*[text()='Nómina de Empleados Fijos']"
         date_elements = driver.find_elements(By.XPATH, search_criteria)
         date_elements[0].click()
         time.sleep(3)
@@ -48,14 +49,14 @@ def download_sns(df, i):
         download_excel_files_from_url(excel_links, folder_name)
         driver.close()
     except:
-        print("Error with URL:", df['Portal'][i])
+        print("Error with URL:", df['portal'][i])
         driver.close()
         pass
     return excel_links
 
 def download_ejercito(df,i):
-    base_url = df['Portal'][i].strip()
-    next_needed_date = df['next_date'][i]
+    base_url = df['portal'][i].strip()
+    next_needed_date = df['query_date'][i]
     next_needed_year, next_needed_month = next_needed_date.split('_')
     next_needed_month_text = month_names_dict[next_needed_month]
     folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
@@ -78,9 +79,9 @@ def download_ejercito(df,i):
     return [ejercito_url]
 
 def download_inaipi(df, i):
-    base_url = df['Portal'][i].strip()
+    base_url = df['portal'][i].strip()
     domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['next_date'][i]
+    next_needed_date = df['query_date'][i]
     next_needed_year, next_needed_month = next_needed_date.split('_')
     next_needed_month_text = month_names_dict[next_needed_month]
     folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
@@ -110,9 +111,9 @@ def download_inaipi(df, i):
     return available_links3
     
 def download_dga(df, i):
-    base_url = df['Portal'][i].strip()
+    base_url = df['portal'][i].strip()
     domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['next_date'][i]
+    next_needed_date = df['query_date'][i]
     next_needed_year, next_needed_month = next_needed_date.split('_')
     next_needed_month_text = month_names_dict[next_needed_month]
     folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
@@ -152,9 +153,9 @@ def download_dga(df, i):
     
 
 def download_inapa(df, i):
-    base_url = df['Portal'][i].strip()
+    base_url = df['portal'][i].strip()
     domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['next_date'][i]
+    next_needed_date = df['query_date'][i]
     next_needed_year, next_needed_month = next_needed_date.split('_')
     next_needed_month_text = month_names_dict[next_needed_month]
     folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
@@ -206,9 +207,9 @@ def download_inapa(df, i):
     return available_links
 
 def download_caasd(df, i):
-    base_url = df['Portal'][i].strip()
+    base_url = df['portal'][i].strip()
     domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['next_date'][i]
+    next_needed_date = df['query_date'][i]
     next_needed_year, next_needed_month = next_needed_date.split('_')
     next_needed_month_text = month_names_dict[next_needed_month]
     folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
@@ -216,5 +217,13 @@ def download_caasd(df, i):
     # In progress
     return []
 
+function_mapping = {
+    'sns': download_sns,
+    'ejercito': download_ejercito,
+    'inaipi': download_inaipi,
+    'dga': download_dga,
+    'inapa': download_inapa,
+    'caasd': download_caasd
+}
 
-download_caasd(df, 5)
+download_sns(df, 0)

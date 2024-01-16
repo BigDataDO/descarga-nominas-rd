@@ -37,21 +37,6 @@ def find_links_to_excel_files(content):
                 ans.append(link_url)
     return list(set(ans))
 
-def find_links_to_excel_files(content):
-    ans = []
-    soup = BeautifulSoup(content, 'html.parser')
-    a_tags = soup.find_all('a')
-    for a in a_tags:
-        # If the <a> tag has a href attribute
-        if 'href' in a.attrs:
-            link_url = a['href']
-
-            # If the link is to an Excel file
-            if (link_url.endswith('.xls') or link_url.endswith('.xlsx')) and (link_url not in ans):
-                # Add the link to the list of Excel file links
-                print('Found Excel file:', link_url)
-                ans.append(link_url)
-    return list(set(ans))
 
 def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None):
     for link in excel_links:
