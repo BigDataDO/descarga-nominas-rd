@@ -1,7 +1,6 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from bs4 import BeautifulSoup
-import time
 import re
 import requests
 import pandas as pd
@@ -9,57 +8,37 @@ import os
 from requests.auth import HTTPBasicAuth
 from utils import *
 
+#### Options ####
+# Run browser with no window
+CONF_HEADLESS_BROWSER = True
+
+# Reading Source files
 url_sources = pd.read_csv('sources_list.csv')
 df = pd.read_csv('input.csv')
 df = pd.merge(df, url_sources, on='nombre_corto', how='left')
 
 #### Processing Functions ####
 # For each portal, we need to write a function that finds the files to download
-
-def download_sns(df, i):
-    base_url = df['portal'][i].strip()
-    next_needed_date = df['query_date'][i]
-    next_needed_year, next_needed_month = next_needed_date.split('_')
-    next_needed_month_text = month_names_dict[next_needed_month]
-    folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
-
-    # Open in headless browser
-    options = webdriver.FirefoxOptions()
-    # options.add_argument("--headless")
+def download_sns():
+    # Open in browser
     driver = webdriver.Firefox(options=options)
-    try:
-        driver.get('https://indrhi.gob.do/transparencia/recursos-humanos/nominas/')
-        # Click the year
-        search_criteria = f"//*[text()='Nómina de Empleados Fijos']"
-        date_elements = driver.find_elements(By.XPATH, search_criteria)
-        date_elements[0].click()
-        time.sleep(3)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
 
-        # Click the month
-        search_criteria = f"//*[text()='{next_needed_month_text}']"
-        date_elements = driver.find_elements(By.XPATH, search_criteria)
-        date_elements[0].click()
-        time.sleep(3)
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
 
-        # Find the link to the Excel file
-        content = driver.page_source
-        excel_links = find_links_to_excel_files(content)
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_links_to_excel_files(content)
 
-        # Download the Excel file
-        download_excel_files_from_url(excel_links, folder_name)
-        driver.close()
-    except:
-        print("Error with URL:", df['portal'][i])
-        driver.close()
-        pass
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
     return excel_links
 
-def download_ejercito(df,i):
-    base_url = df['portal'][i].strip()
-    next_needed_date = df['query_date'][i]
-    next_needed_year, next_needed_month = next_needed_date.split('_')
-    next_needed_month_text = month_names_dict[next_needed_month]
-    folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
+def download_ejercito():
     response = requests.get(base_url)
 
     # Construct the URL
@@ -78,152 +57,85 @@ def download_ejercito(df,i):
     download_excel_files_from_url([ejercito_url], folder_name)
     return [ejercito_url]
 
-def download_inaipi(df, i):
-    base_url = df['portal'][i].strip()
-    domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['query_date'][i]
-    next_needed_year, next_needed_month = next_needed_date.split('_')
-    next_needed_month_text = month_names_dict[next_needed_month]
-    folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
+def download_inaipi():
     response = requests.get(base_url)
-
-    soup = BeautifulSoup(response.content, 'html.parser')
-    a_tags = soup.find_all('a')
-    # filter links with the format "nominas-2023"
-    available_links = [domain + '/' + a['href'] for a in a_tags if 'href' in a.attrs and f'nominas-{next_needed_year}' in a['href']]
-    if len(available_links) == 0:
-        raise("Expected link not found:", f'nominas-{next_needed_year}')
+    available_links = find_links_matching_all(response, [f'nominas-{next_needed_year}'])
     
     response = requests.get(available_links[0])
-    soup2 = BeautifulSoup(response.content, 'html.parser')
-    a_tags2 = soup2.find_all('a')
-    # filter links with the format "nominas-diciembre-2023"
-    available_links2 = [domain + '/' + a['href'] for a in a_tags2 if 'href' in a.attrs and f'nominas-{next_needed_month_text.lower()}-{next_needed_year}' in a['href']]
-
+    available_links2 = find_links_matching_all(response, [f'nominas-{next_needed_month_text.lower()}-{next_needed_year}'])
+    
     response = requests.get(available_links2[0])
-    soup3 = BeautifulSoup(response.content, 'html.parser')
-    a_tags3 = soup3.find_all('a')
-
-    available_links3 = [domain + '/' + a['href'] for a in a_tags3 if 'href' in a.attrs and f'nominas-{next_needed_month_text.lower()}-{next_needed_year}' in a['href'] and 'download' in a['href']]
+    available_links3 = find_links_matching_all(response, [f'nominas-{next_needed_month_text.lower()}-{next_needed_year}', 'download'])
 
     download_excel_files_from_url(available_links3, folder_name, filename_from_headers=True)
 
     return available_links3
     
-def download_dga(df, i):
-    base_url = df['portal'][i].strip()
-    domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['query_date'][i]
-    next_needed_year, next_needed_month = next_needed_date.split('_')
-    next_needed_month_text = month_names_dict[next_needed_month]
-    folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
+def download_dga():
     response = requests.get(base_url)
 
     # Open in headless browser
-    options = webdriver.FirefoxOptions()
-    options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
     
     # Click the Nomina
-    search_criteria = f"//*[text()='Nómina']"
-    date_elements = driver.find_elements(By.XPATH, search_criteria)
-    date_elements[0].click()
-    time.sleep(3)
+    click_element_by_text(driver, 'Nómina')
 
     # Click the year
-    search_criteria = f"//*[text()={next_needed_year}]"
-    date_elements = driver.find_elements(By.XPATH, search_criteria)
-    # filter empty elements
-    date_elements = [el for el in date_elements if el.text]
-    date_elements[0].click()
-    time.sleep(3)
+    click_element_by_text(driver, next_needed_year, partial_match=True)
 
     # find the link to the desired document
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    a_tags = soup.find_all('a')
-    available_links = [domain + '/' + a['href'] for a in a_tags if
-                        'href' in a.attrs and
-                         f'{next_needed_month_text.lower()}' in a['href'] and
-                         f'{next_needed_year}' in a['href'] and
-                         'xlsx' in a['href']
-                        ]
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                                    f'{next_needed_year}',
+                                                                    'xlsx'])
+    
     download_excel_files_from_url(available_links, folder_name)
     return available_links
     
-
-def download_inapa(df, i):
-    base_url = df['portal'][i].strip()
-    domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['query_date'][i]
-    next_needed_year, next_needed_month = next_needed_date.split('_')
-    next_needed_month_text = month_names_dict[next_needed_month]
-    folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
+def download_inapa():
     # Open in headless browser
-    options = webdriver.FirefoxOptions()
-    options.add_argument("--headless")
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
 
     # Click the year
-    search_criteria = f"//*[text()='{next_needed_year}']"
-    date_elements = driver.find_elements(By.XPATH, search_criteria)
-    date_elements[0].click()
-    time.sleep(3)
+    click_element_by_text(driver, next_needed_year)
 
     # Click the month
-    search_criteria = f"//*[text()='{next_needed_month_text.upper()}']"
-    date_elements = driver.find_elements(By.XPATH, search_criteria)
-    date_elements[0].click()
-    time.sleep(3)
+    click_element_by_text(driver, next_needed_month_text.upper())
 
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    a_tags = soup.find_all('a')
-    available_links = [domain + '/' + a['href'] for a in a_tags if
-                        'href' in a.attrs and
-                         f'{next_needed_month_text.lower()}' in a['href'] and
-                         f'{next_needed_year}' in a['href'] and
-                         'download' in a['href']
-                        ]
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                        f'{next_needed_year}',
+                                                        'download'])
     
     # Click Nominas Adicionales
-    search_criteria = f"//*[text()='NOMINAS ADICIONALES']"
-    date_elements = driver.find_elements(By.XPATH, search_criteria)
-    date_elements[0].click()
-    time.sleep(3)
+    click_element_by_text(driver, 'NOMINAS ADICIONALES')
 
-    soup = BeautifulSoup(driver.page_source, 'html.parser')
-    a_tags = soup.find_all('a')
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                        f'{next_needed_year}',
+                                                        'download'])
 
-    available_links+=[domain + '/' + a['href'] for a in a_tags if
-                        'href' in a.attrs and
-                         f'{next_needed_month_text.lower()}' in a['href'] and
-                         f'{next_needed_year}' in a['href'] and
-                         'download' in a['href']
-                        ]
-    
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
     driver.close()
     return available_links
 
-def download_caasd(df, i):
-    base_url = df['portal'][i].strip()
-    domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-    next_needed_date = df['query_date'][i]
-    next_needed_year, next_needed_month = next_needed_date.split('_')
-    next_needed_month_text = month_names_dict[next_needed_month]
-    folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
-
+def download_caasd():
     # In progress
     return []
 
-function_mapping = {
-    'sns': download_sns,
-    'ejercito': download_ejercito,
-    'inaipi': download_inaipi,
-    'dga': download_dga,
-    'inapa': download_inapa,
-    'caasd': download_caasd
-}
-
-download_sns(df, 0)
+# main function
+if __name__ == "__main__":
+    for i in range(len(df)):
+        print(df['nombre_corto'][i])
+        # common variables
+        base_url = df['portal'][i].strip()
+        domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
+        next_needed_date = df['query_date'][i]
+        next_needed_year, next_needed_month = next_needed_date.split('_')
+        next_needed_month_text = month_names_dict[next_needed_month]
+        folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
+        headless_option = "--headless" if CONF_HEADLESS_BROWSER else ""
+        options = webdriver.FirefoxOptions()
+        if CONF_HEADLESS_BROWSER:
+            options.add_argument('--headless')
+        # calling the download function
+        eval(f"download_{df['nombre_corto'][i].lower()}")()
