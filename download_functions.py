@@ -122,6 +122,78 @@ def download_caasd():
     # In progress
     return []
 
+def download_indrhi():
+     # In progress
+    return []
+
+def download_dgii():
+     # In progress
+    return []
+
+def download_ayuntamientosantiago():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_links_to_excel_files(content)
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
+
+
+def download_opret():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+    urls = ["https://www.opret.gob.do/Documentos/Recursos Humanos/NÓMINA EMPLEADOS FIJO METRO " + next_needed_month_text.upper()+" "+next_needed_year+".xls",
+            "https://www.opret.gob.do/Documentos/Recursos Humanos/NÓMINA EMPLEADOS FIJO LINEA 2C " + next_needed_month_text.upper()+" "+next_needed_year+".xls", 
+            "https://www.opret.gob.do/Documentos/Recursos Humanos/NÓMINA EMPLEADOS TEMPORERO OPRET " + next_needed_month_text.upper()+" "+next_needed_year+".xls"]
+
+    # The site always returns a 200 response, even if the file doesn't exist
+    # So we need to check the response contains "Página no encontrada"
+    for url in urls :
+        response = requests.get(url)
+        if "Página no encontrada" in response.text:
+            raise("No Excel file found:", url)
+        else:
+            print("Found Excel file:", url)
+
+        # Download the Excel file
+        download_excel_files_from_url([url], folder_name)
+
+def download_senado():
+    # # Open in browser
+    # driver = webdriver.Firefox(options=options)
+    # driver.get(base_url)
+    # # Click the year
+    # click_element_by_text(driver, next_needed_year)
+
+    # # Click the month
+    # click_element_by_text(driver, next_needed_month_text +"-"+next_needed_year)
+    # # print(next_needed_month_text + "-"+next_needed_year)
+
+    # # Find the link to the Excel file
+    # content = driver.page_source
+    # excel_links = find_links_to_excel_files(content)
+
+    # # Download the Excel file
+    # download_excel_files_from_url(excel_links, folder_name)
+    # driver.close()
+    # return excel_links
+    #process 
+    return []
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
