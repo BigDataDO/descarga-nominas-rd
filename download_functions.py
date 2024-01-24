@@ -200,18 +200,17 @@ def download_senado():
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
     # Click the year
-    click_element_by_text(driver, next_needed_year, sleep_time=20)
+    click_element_by_text(driver, next_needed_year, sleep_time=30)
 
     # Click the month
-    click_element_by_text(driver, next_needed_month_text, sleep_time=20)
+    click_element_by_text(driver, next_needed_month_text, sleep_time=30)
 
     #Click the nomina
-    click_element_by_text(driver, "Nómina Sueldos Fijos "+next_needed_month_text+"-"+next_needed_year, sleep_time=20)
+    click_element_by_text(driver, "Nómina Sueldos Fijos "+next_needed_month_text+"-"+next_needed_year, sleep_time=15)
 
     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
                                                         f'{next_needed_year}',
-                                                        'nomina-sueldos-fijos'])
-    print(available_links)
+                                                        'nomina-sueldos-fijos'], without_domain=True)
 
     # Download the Excel file
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
@@ -258,6 +257,25 @@ def download_dncd():
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, allow_redirects=False, split_arg="Nomina/")
     driver.close()
     return available_links
+
+def download_inposdom():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_links_to_excel_files(content)
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
 
 # main function
 if __name__ == "__main__":
