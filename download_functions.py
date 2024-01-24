@@ -277,6 +277,23 @@ def download_inposdom():
     driver.close()
     return excel_links
 
+def download_bagricola():
+    # Open in headless browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    # Click the year
+    click_element_by_text(driver, next_needed_year, partial_match=True)
+
+    # find the link to the desired document
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.upper()}',
+                                                                    f'{next_needed_year}',
+                                                                    'xlsx'], without_domain=True)
+    
+    download_excel_files_from_url(available_links, folder_name)
+    driver.close()
+    return available_links
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
