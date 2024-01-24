@@ -106,7 +106,7 @@ def download_inapa():
     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
                                                         f'{next_needed_year}',
                                                         'download'])
-    
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
     # Click Nominas Adicionales
     click_element_by_text(driver, 'NOMINAS ADICIONALES')
 
@@ -122,9 +122,32 @@ def download_caasd():
     # In progress
     return []
 
-def download_indrhi():
-     # In progress
-    return []
+# def download_indrhi():
+#     # Open in headless browser
+#     driver = webdriver.Firefox(options=options)
+#     driver.get(base_url)
+    
+#     # Click the Nomina
+#     click_element_by_text(driver, 'Nóminas Contratados', sleep_time=8)
+
+#     # Click the year
+#     click_element_by_text(driver, "Año "+next_needed_year, sleep_time=8)
+#     print("Año "+next_needed_year)
+
+#     # find the link to the desired document
+#     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+#                                                                     f'{next_needed_year}',
+#                                                                     'xlsx'])
+#        # Find the link to the Excel file
+#     content = driver.page_source
+#     # print(content)
+#     excel_links = find_links_to_excel_files(content)
+
+#     print(available_links)
+#     print(excel_links)
+    
+#     download_excel_files_from_url(available_links, folder_name)
+#     return available_links
 
 def download_dgii():
      # In progress
@@ -173,26 +196,68 @@ def download_opret():
         download_excel_files_from_url([url], folder_name)
 
 def download_senado():
-    # # Open in browser
-    # driver = webdriver.Firefox(options=options)
-    # driver.get(base_url)
-    # # Click the year
-    # click_element_by_text(driver, next_needed_year)
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year, sleep_time=20)
 
-    # # Click the month
-    # click_element_by_text(driver, next_needed_month_text +"-"+next_needed_year)
-    # # print(next_needed_month_text + "-"+next_needed_year)
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text, sleep_time=20)
 
-    # # Find the link to the Excel file
-    # content = driver.page_source
-    # excel_links = find_links_to_excel_files(content)
+    #Click the nomina
+    click_element_by_text(driver, "Nómina Sueldos Fijos "+next_needed_month_text+"-"+next_needed_year, sleep_time=20)
 
-    # # Download the Excel file
-    # download_excel_files_from_url(excel_links, folder_name)
-    # driver.close()
-    # return excel_links
-    #process 
-    return []
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                        f'{next_needed_year}',
+                                                        'nomina-sueldos-fijos'])
+    print(available_links)
+
+    # Download the Excel file
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
+    driver.close()
+    return available_links
+        
+# def download_inespre():
+#     # Open in browser
+#     driver = webdriver.Firefox(options=options)
+#     driver.get(base_url)
+#     # Click the year
+#     click_element_by_text(driver, next_needed_year, partial_match=True)
+
+#     # # find the link to the desired document
+#     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+#                                                                     f'{next_needed_year}',
+#                                                                     'xlsx'])
+    
+#     print(available_links)
+ 
+#     # Find the link to the Excel file
+#     content = driver.page_source
+#     # print(available_links)
+#     excel_links = find_links_to_excel_files(content)
+#     print(excel_links)
+#     # Download the Excel file
+#     download_excel_files_from_url(available_links, folder_name, allow_redirects=True)
+#     driver.close()
+#     return available_links
+        
+
+def download_dncd():
+    # Open in headless browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                        f'{next_needed_year}',
+                                                        'download'])
+    # Download the Excel file
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, allow_redirects=False, split_arg="Nomina/")
+    driver.close()
+    return available_links
 
 # main function
 if __name__ == "__main__":

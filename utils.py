@@ -63,7 +63,7 @@ def find_links_to_excel_files(content):
                 ans.append(link_url)
     return list(set(ans))
 
-def find_links_matching_all(response, items):
+def find_links_matching_all(response, items, without_domain=False):
     """
     Finds all links in the response that contain all the items in the list
     :param response: Selenium driver or requests response
@@ -84,10 +84,10 @@ def find_links_matching_all(response, items):
     matching_links = []
     for link in available_links:
         if all(item in link for item in items):
-            matching_links.append(domain+link)
+            matching_links.append(domain+link if without_domain is False else link)
     return list(set(matching_links))
 
-def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None):
+def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None, allow_redirects=True, split_arg = None):
     """
     Downloads all Excel files from a list of links
     :param excel_links: list of links to Excel files
@@ -102,12 +102,16 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
         # Download the file
-        r = requests.get(link, allow_redirects=True)
+        r = requests.get(link, allow_redirects=allow_redirects)
         # Get the filename from the URL
         if filename_from_headers is None:
             filename = re.findall(r'/([^/]+)$', link)[0]
         else:
-            filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+            if allow_redirects:
+                print(r.headers)
+                filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+            else:
+                filename = r.headers.get('location').split(split_arg)[1]
         
         if filename.endswith('.xls') or filename.endswith('.xlsx'):
             open(folder_name + '/' + filename, 'wb').write(r.content)
