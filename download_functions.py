@@ -326,6 +326,36 @@ def download_uasd():
     driver.close()
     return excel_links
 
+def download_minc():
+    list = [
+        'Nómina Personal Fijo',
+        'Nómina Personal Vigilancia',
+        'Nómina Personal Temporal'
+    ]
+
+    driver = webdriver.Firefox(options=options)
+
+    for element in list:
+        # Open in browser
+        driver.get(base_url)
+
+        # Click the Nomina
+        click_element_by_text(driver, element)
+
+        # Click the year
+        click_element_by_text(driver, next_needed_year)
+
+        if next_needed_year != "2023" and (element == "Nómina Personal Fijo" or element == "Nómina Personal Vigilancia"):
+            # Click the month
+            click_element_by_text(driver, next_needed_year)
+
+        #Find the links 
+        available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}', 'download'])
+
+        # Download the Excel file
+        download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
+    driver.close()
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
