@@ -87,7 +87,7 @@ def find_links_matching_all(response, items, without_domain=False):
             matching_links.append(domain+link if without_domain is False else link)
     return list(set(matching_links))
 
-def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None, allow_redirects=True, split_arg = None):
+def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None, headers=None, allow_redirects=True, split_arg = None):
     """
     Downloads all Excel files from a list of links
     :param excel_links: list of links to Excel files
@@ -102,7 +102,7 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
         # Download the file
-        r = requests.get(link, allow_redirects=allow_redirects)
+        r = requests.get(link, allow_redirects=allow_redirects, headers=headers)
         # Get the filename from the URL
         if filename_from_headers is None:
             filename = re.findall(r'/([^/]+)$', link)[0]

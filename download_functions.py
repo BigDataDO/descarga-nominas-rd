@@ -356,6 +356,27 @@ def download_minc():
         download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
     driver.close()
 
+def download_miderec():
+     # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    #Find the links 
+    available_links = find_links_matching_all(driver,  ['task=file.download'], without_domain=True)
+    print(available_links)
+
+    # Download the Excel file
+    headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+    'Accept-Language': 'en-US,en;q=0.9'}
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, headers=headers)
+    driver.close()
+    return available_links
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
