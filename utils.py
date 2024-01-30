@@ -42,7 +42,7 @@ def click_element_by_text(driver, text, sleep_time=3, partial_match=False):
     date_elements[0].click()
     time.sleep(sleep_time)
 
-def find_links_to_excel_files(content):
+def find_links_to_excel_files(content, domain=None):
     """
     Finds all links to Excel files in the content of a page
     :param content: HTML content of the page
@@ -60,7 +60,7 @@ def find_links_to_excel_files(content):
             if (link_url.endswith('.xls') or link_url.endswith('.xlsx')) and (link_url not in ans):
                 # Add the link to the list of Excel file links
                 print('Found Excel file:', link_url)
-                ans.append(link_url)
+                ans.append(domain+link_url if domain else link_url)
     return list(set(ans))
 
 def find_links_matching_all(response, items, without_domain=False):

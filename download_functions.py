@@ -368,7 +368,6 @@ def download_miderec():
 
     #Find the links 
     available_links = find_links_matching_all(driver,  ['task=file.download'], without_domain=True)
-    print(available_links)
 
     # Download the Excel file
     headers = {'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
@@ -376,6 +375,27 @@ def download_miderec():
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, headers=headers)
     driver.close()
     return available_links
+
+
+def download_micm():
+     # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, "Nómina " +next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text + " ")
+
+     # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_links_to_excel_files(content, domain="https://www.micm.gob.do")
+    print(excel_links)
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
 
 # main function
 if __name__ == "__main__":
