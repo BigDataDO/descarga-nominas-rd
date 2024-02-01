@@ -42,7 +42,7 @@ def click_element_by_text(driver, text, sleep_time=3, partial_match=False):
     date_elements[0].click()
     time.sleep(sleep_time)
 
-def find_links_to_excel_files(content):
+def find_links_to_excel_files(content, domain=None):
     """
     Finds all links to Excel files in the content of a page
     :param content: HTML content of the page
@@ -60,10 +60,10 @@ def find_links_to_excel_files(content):
             if (link_url.endswith('.xls') or link_url.endswith('.xlsx')) and (link_url not in ans):
                 # Add the link to the list of Excel file links
                 print('Found Excel file:', link_url)
-                ans.append(link_url)
+                ans.append(domain+link_url if domain else link_url)
     return list(set(ans))
 
-def find_links_matching_all(response, items):
+def find_links_matching_all(response, items, without_domain=False):
     """
     Finds all links in the response that contain all the items in the list
     :param response: Selenium driver or requests response
@@ -84,10 +84,10 @@ def find_links_matching_all(response, items):
     matching_links = []
     for link in available_links:
         if all(item in link for item in items):
-            matching_links.append(domain+link)
+            matching_links.append(domain+link if without_domain is False else link)
     return list(set(matching_links))
 
-def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None):
+def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None, headers=None, allow_redirects=True, split_arg = None):
     """
     Downloads all Excel files from a list of links
     :param excel_links: list of links to Excel files
@@ -102,7 +102,7 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
         # Download the file
-        r = requests.get(link, allow_redirects=True)
+        r = requests.get(link, allow_redirects=allow_redirects, headers=headers)
         # Get the filename from the URL
 
         # if the file is a PDF, skip it
@@ -115,6 +115,8 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         else:
             if 'content-disposition' in r.headers:
                 filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+            elif not allow_redirects:
+                filename = r.headers.get('location').split(split_arg)[1]
             elif 'officedocument' in r.headers.get('content-type'):
                 filename = re.findall(r'filename="([^"]+)"', r.headers.get('content-type'))[0]
             else:
@@ -126,5 +128,4 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
 
         if not filename.endswith('.xls') and not filename.endswith('.xlsx'):
             filename += '.xlsx'
-
-        open(folder_name + '/' + filename, 'wb').write(r.content)
+            open(folder_name + '/' + filename, 'wb').write(r.content)
