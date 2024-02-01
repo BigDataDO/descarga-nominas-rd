@@ -104,10 +104,27 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         # Download the file
         r = requests.get(link, allow_redirects=True)
         # Get the filename from the URL
+
+        # if the file is a PDF, skip it
+        if 'application/pdf' in r.headers.get('content-type'):
+            print('PDF file found, skipping:', link)
+            continue
+
         if filename_from_headers is None:
             filename = re.findall(r'/([^/]+)$', link)[0]
         else:
-            filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+            if 'content-disposition' in r.headers:
+                filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+            elif 'officedocument' in r.headers.get('content-type'):
+                filename = re.findall(r'filename="([^"]+)"', r.headers.get('content-type'))[0]
+            else:
+                print('Could not find filename in headers, using URL')
+                filename = re.findall(r'/([^/]+)$', link)[0]
         
-        if filename.endswith('.xls') or filename.endswith('.xlsx'):
-            open(folder_name + '/' + filename, 'wb').write(r.content)
+        # make sure filename is a valid windows/linux filename
+        filename = re.sub(r'[\\/*?:"<>=|]', '', filename)
+
+        if not filename.endswith('.xls') and not filename.endswith('.xlsx'):
+            filename += '.xlsx'
+
+        open(folder_name + '/' + filename, 'wb').write(r.content)

@@ -72,8 +72,6 @@ def download_inaipi():
     return available_links3
     
 def download_dga():
-    response = requests.get(base_url)
-
     # Open in headless browser
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
@@ -122,6 +120,47 @@ def download_caasd():
     # In progress
     return []
 
+def download_ln():
+    # Development paused because the site is down
+    response = requests.get(f'https://loterianacional.gob.do/transparencia/recursos-humanos/nomina-de-empleados/periodo?p={next_needed_year}')
+    available_links = find_links_matching_all(response, [f'{next_needed_month_text.upper()}',
+                                                         f'{next_needed_year}'])
+
+def download_feda():
+    # Open in headless browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    # Click the year
+    click_element_by_text(driver, next_needed_year, partial_match=True)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text, partial_match=True)
+
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                        f'{next_needed_year}',
+                                                        'download'])
+    
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
+    driver.close()
+    return available_links
+
+def download_intrant():
+    # Open in headless browser
+    driver = webdriver.Firefox(options=options)
+
+    # this site actually has 3 links
+    carpetas = ['nomina-militares','empleados-contratados','empleados-fijos']
+    for carpeta in carpetas:
+        driver.get(f'{base_url}/{carpeta}')
+        # Click the year
+        click_element_by_text(driver, next_needed_year, partial_match=True)
+        available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}', f'{next_needed_year}'])
+        download_excel_files_from_url(available_links, folder_name)
+    driver.close()
+    return available_links
+
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
@@ -133,7 +172,6 @@ if __name__ == "__main__":
         next_needed_year, next_needed_month = next_needed_date.split('_')
         next_needed_month_text = month_names_dict[next_needed_month]
         folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
-        headless_option = "--headless" if CONF_HEADLESS_BROWSER else ""
         options = webdriver.FirefoxOptions()
         if CONF_HEADLESS_BROWSER:
             options.add_argument('--headless')
