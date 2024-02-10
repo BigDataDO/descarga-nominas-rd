@@ -42,6 +42,27 @@ def click_element_by_text(driver, text, sleep_time=3, partial_match=False):
     date_elements[0].click()
     time.sleep(sleep_time)
 
+def find_download_links(content, domain=None):
+    """
+    Finds all download links for Excel files in the content of a page
+    :param content: HTML content of the page
+    :param domain: Optional domain to prepend to the links if they're relative URLs
+    :return: list of download links for Excel files
+    """
+    soup = BeautifulSoup(content, 'html.parser')
+    download_link_tags = soup.find_all('a', class_='btn-descargar')
+    download_links = []
+
+    for tag in download_link_tags:
+        if 'href' in tag.attrs:
+            download_link = tag['href']
+            # Prepend domain if provided and the link is relative
+            if domain and not download_link.startswith(('http://', 'https://')):
+                download_link = domain + download_link
+            download_links.append(download_link)
+
+    return download_links
+    
 def find_links_to_excel_files(content, domain=None):
     """
     Finds all links to Excel files in the content of a page
@@ -102,7 +123,7 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         if not os.path.exists(folder_name):
             os.makedirs(folder_name)
         # Download the file
-        r = requests.get(link, allow_redirects=allow_redirects, headers=headers)
+        r = requests.get(link, allow_redirects=allow_redirects, headers=headers,verify=False)
         # Get the filename from the URL
 
         # if the file is a PDF, skip it
