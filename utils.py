@@ -128,4 +128,4 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
 
         if not filename.endswith('.xls') and not filename.endswith('.xlsx'):
             filename += '.xlsx'
-            open(folder_name + '/' + filename, 'wb').write(r.content)
+        open(folder_name + '/' + filename, 'wb').write(r.content)
