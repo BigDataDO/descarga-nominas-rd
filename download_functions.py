@@ -526,6 +526,25 @@ def download_omsa():
     driver.close()
     return available_links
 
+def download_dgba():
+    # Open in headless browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    # Click the year
+    click_element_by_text(driver, "Nómina " + next_needed_year, partial_match=True)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text, partial_match=True)
+
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
+                                                        f'{next_needed_year}',
+                                                        'download'])
+    
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True,  allow_redirects=False, split_arg=next_needed_month_text.lower()+"/")
+    driver.close()
+    return available_links
+
 
 # main function
 if __name__ == "__main__":
