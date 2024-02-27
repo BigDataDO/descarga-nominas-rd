@@ -1,12 +1,12 @@
 from selenium import webdriver
 from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
 import re
 import requests
 import pandas as pd
-import os
-from requests.auth import HTTPBasicAuth
 from utils import *
+import time
 
 #### Options ####
 # Run browser with no window
@@ -611,13 +611,41 @@ def download_mt():
 
     # Find the link to the Excel file
     content = driver.page_source
-    excel_links = find_links_to_excel_files(content,  domain="https://mt.gob.do")
+    excel_links = find_links_to_excel_files(content, domain="https://mt.gob.do")
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
+
+##Funcion en construccion - Inicio ----
+def download_mispas():
+     # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    wait = WebDriverWait(driver, 5)
+
+    # Utilizar el método 'presence_of_element_located' para esperar a que el elemento esté presente en el DOM
+    element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'vc_row wpb_row vc_row-fluid')))
+    time.sleep(4)
+    print(element)
+    # print(driver.page_source)
+    # Click the year
+    click_element_by_text(driver, "Año "+next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_links_to_excel_files(content)
     print(excel_links)
 
     # Download the Excel file
     download_excel_files_from_url(excel_links, folder_name)
     driver.close()
     return excel_links
+## Funcion en construccion - Fin ----
 
 # main function
 if __name__ == "__main__":
