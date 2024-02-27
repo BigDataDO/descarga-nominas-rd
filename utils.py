@@ -130,7 +130,7 @@ def find_links_matching_all(response, items, without_domain=False):
 #             filename += '.xlsx'
 #         open(folder_name + '/' + filename, 'wb').write(r.content)
 
-def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None, headers=None, allow_redirects=True, split_arg = None):
+def download_excel_files_from_url(excel_links, folder_name, filename_from_headers=None, is_utf8_filename=False, headers=None, allow_redirects=True, split_arg = None):
     """
     Downloads all Excel files from a list of links
     :param excel_links: list of links to Excel files
@@ -151,7 +151,7 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
             filename = re.findall(r'/([^/]+)$', link)[0]
         else:
             if allow_redirects:
-                filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+                filename = r.headers.get('content-disposition').split('filename*=UTF-8' if is_utf8_filename else 'filename=')[1].replace('"','')
             else:
                 filename = r.headers.get('location').split(split_arg)[1]
                 print(filename)

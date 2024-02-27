@@ -583,6 +583,22 @@ def download_mip():
     driver.close()
     return excel_links
 
+def download_pgr():
+    # Open in headless browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    # Click the year
+    click_element_by_text(driver, next_needed_year, partial_match=True)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text, partial_match=True)
+
+    available_links = find_links_matching_all(driver,  ['Inicio/DatosAbiertos'])
+
+    download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, is_utf8_filename=True)
+    driver.close()
+    return available_links
 
 # main function
 if __name__ == "__main__":
