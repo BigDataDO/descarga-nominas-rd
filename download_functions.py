@@ -576,7 +576,6 @@ def download_mip():
     # Find the link to the Excel file
     content = driver.page_source
     excel_links = find_links_to_excel_files(content, domain="https://mip.gob.do")
-    print(excel_links)
 
     # Download the Excel file
     download_excel_files_from_url(excel_links, folder_name)
@@ -599,6 +598,26 @@ def download_pgr():
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, is_utf8_filename=True)
     driver.close()
     return available_links
+
+def download_mt():
+     # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, "NOMINA "+next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, "NOMINA DE EMPLEADOS -" +next_needed_month_text.upper()+"- "+next_needed_year)
+
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_links_to_excel_files(content,  domain="https://mt.gob.do")
+    print(excel_links)
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
 
 # main function
 if __name__ == "__main__":
