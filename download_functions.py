@@ -647,6 +647,40 @@ def download_mispas():
     return excel_links
 ## Funcion en construccion - Fin ----
 
+def download_mimarena():
+    list = [
+        'Personal en Suplencia',
+        'Personal Temporal',
+        'Personal en Interinato',
+        'Personal Militar',
+        'Personal Fijo'
+    ]
+
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+
+    for item in list:
+        print(item)
+        driver.get(base_url)
+        # Click the year
+        click_element_by_text(driver, next_needed_year)
+
+        # Click the month
+        click_element_by_text(driver, next_needed_month_text)
+
+        # Click the nomina
+        click_element_by_text(driver, item)
+
+        # Find the link to the Excel file
+        content = driver.page_source
+        excel_links = find_links_to_excel_files(content)
+
+        # Download the Excel file
+        download_excel_files_from_url(excel_links, folder_name)
+
+    driver.close()
+    return excel_links
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
