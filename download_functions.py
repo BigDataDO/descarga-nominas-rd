@@ -10,7 +10,7 @@ import time
 
 #### Options ####
 # Run browser with no window
-CONF_HEADLESS_BROWSER = True
+CONF_HEADLESS_BROWSER = False
 
 # Reading Source files
 url_sources = pd.read_csv('sources_list.csv')
@@ -19,6 +19,49 @@ df = pd.merge(df, url_sources, on='nombre_corto', how='left')
 
 #### Processing Functions ####
 # For each portal, we need to write a function that finds the files to download
+
+
+def download_ce():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_download_links(content,'https://www.comedoreseconomicos.gob.do')
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
+
+
+def download_cgr():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    # Find the link to the Excel file
+    content = driver.page_source
+    excel_links = find_download_links(content,'https://www.contraloria.gob.do')
+
+
+    # Download the Excel file
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+    return excel_links
+
+
 def download_sns():
     # Open in browser
     driver = webdriver.Firefox(options=options)
@@ -170,7 +213,6 @@ def download_ayuntamientosantiago():
     driver.close()
     return excel_links
 
-
 def download_opret():
     # Open in browser
     driver = webdriver.Firefox(options=options)
@@ -242,7 +284,6 @@ def download_senado():
 #     driver.close()
 #     return available_links
         
-
 def download_dncd():
     # Open in headless browser
     driver = webdriver.Firefox(options=options)
@@ -376,7 +417,6 @@ def download_miderec():
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True, headers=headers)
     driver.close()
     return available_links
-
 
 def download_micm():
      # Open in browser
