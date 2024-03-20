@@ -721,6 +721,34 @@ def download_mimarena():
     driver.close()
     return excel_links
 
+def download_iad(): ##INSTITUTO AGRARIO DOMINICANO
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    click_element_by_text(driver, 'Nomina Personal Fijo')
+    click_element_by_text(driver, next_needed_year)
+    click_element_by_text(driver, next_needed_month_text)
+
+    content = driver.page_source
+    ##excel_links = find_links_to_excel_files(content)
+    excel_links = find_download_links(content,'https://iad.gob.do')
+
+    ##Se necesita volver al inicio
+    click_element_by_text(driver, 'Nómina ')
+    click_element_by_text(driver, 'Nomina Personal Temporero')
+    click_element_by_text(driver, next_needed_year)
+    click_element_by_text(driver, next_needed_month_text)
+
+    content = driver.page_source
+    ##excel_links.extend(find_links_to_excel_files(content))
+    excel_links.extend(find_download_links(content,'https://iad.gob.do'))
+
+    download_excel_files_from_url(excel_links, folder_name)
+    driver.close()
+
+    return excel_links
+
+
 # main function
 if __name__ == "__main__":
     for i in range(len(df)):
