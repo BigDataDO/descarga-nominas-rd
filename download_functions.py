@@ -190,10 +190,6 @@ def download_caasd():
 #     download_excel_files_from_url(available_links, folder_name)
 #     return available_links
 
-def download_dgii():
-     # In progress
-    return []
-
 def download_ayuntamientosantiago():
     # Open in browser
     driver = webdriver.Firefox(options=options)
@@ -748,6 +744,46 @@ def download_iad(): ##INSTITUTO AGRARIO DOMINICANO
 
     return excel_links
 
+# def download_dgii():
+
+#     tipos_pags = ['Contratados','Nombrado','Periodo%20de%20Prueba']
+#     zip_links = []
+
+#     for tipo in tipos_pags:
+#         link = 'https://dgii.gov.do/transparencia/recursosHumanos/nominaEmpleados/Documents/'+next_needed_year+'/'+tipo+'%20'+next_needed_month_text+'%20'+next_needed_year+'.zip'
+#         response = requests.get(link)
+#         if "Página no encontrada" in response.text:
+#             link = 'https://dgii.gov.do/transparencia/recursosHumanos/nominaEmpleados/Documents/'+next_needed_year+'/'+tipo+'%20'+next_needed_month_text+'%20'+next_needed_year+'_N.zip'
+#             responsne = requests.get(link)
+#             if "Página no encontrada" in response.text:
+#                 print("No Zip file found:", link)
+#             else:
+#                 print("Found Zip file:", link)
+#                 zip_links.extend(link)      
+#         else:
+#             print("Found Zip file:", link)  
+#             zip_links.extend(link)    
+
+#     requests.get(zip_links) ### No se si esto es suficiente para descargar
+
+#     return zip_links
+
+def download_mh():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    click_element_by_text(driver, next_needed_year)
+    ##click_element_by_text(driver, 'Ver Documentos', partial_match=True)
+
+    
+    ##x = driver.find_elements(By.XPATH, f"//*[contains(text(),'{next_needed_month_text}')]")
+    ##click_element_by_text(x, 'Ver Documentos', partial_match=True)
+
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}-{next_needed_year}','xlsx'], without_domain=True)
+    download_excel_files_from_url(available_links, folder_name)
+    driver.close()
+
+    return available_links
 
 # main function
 if __name__ == "__main__":
