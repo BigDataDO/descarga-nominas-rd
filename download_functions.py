@@ -7,10 +7,12 @@ import requests
 import pandas as pd
 from utils import *
 import time
+import logging
 
 #### Options ####
 # Run browser with no window
 CONF_HEADLESS_BROWSER = False
+logging.basicConfig(filename='errors.log', filemode='w', level=logging.INFO)
 
 # Reading Source files
 url_sources = pd.read_csv('sources_list.csv')
@@ -787,17 +789,22 @@ def download_mh():
 
 # main function
 if __name__ == "__main__":
+    
     for i in range(len(df)):
-        print(df['nombre_corto'][i])
-        # common variables
-        base_url = df['portal'][i].strip()
-        domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
-        next_needed_date = df['query_date'][i]
-        next_needed_year, next_needed_month = next_needed_date.split('_')
-        next_needed_month_text = month_names_dict[next_needed_month]
-        folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
-        options = webdriver.FirefoxOptions()
-        if CONF_HEADLESS_BROWSER:
-            options.add_argument('--headless')
-        # calling the download function
-        eval(f"download_{df['nombre_corto'][i].lower()}")()
+        try:
+            print(df['nombre_corto'][i])
+            # common variables
+            base_url = df['portal'][i].strip()
+            domain = re.findall(r'^(https?://[^/]+)', base_url)[0]
+            next_needed_date = df['query_date'][i]
+            next_needed_year, next_needed_month = next_needed_date.split('_')
+            next_needed_month_text = month_names_dict[next_needed_month]
+            folder_name = f"downloads/{next_needed_date}/{df['nombre_corto'][i]}"
+            options = webdriver.FirefoxOptions()
+            if CONF_HEADLESS_BROWSER:
+                options.add_argument('--headless')
+            # calling the download function
+            eval(f"download_{df['nombre_corto'][i].lower()}")()
+        except:
+            logging.error(f'Error procesando {df['nombre_corto'][i]}')
+            continue    
