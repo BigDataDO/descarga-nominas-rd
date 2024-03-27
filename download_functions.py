@@ -787,6 +787,18 @@ def download_mh():
 
     return available_links
 
+def download_ln():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    click_element_by_text(driver, next_needed_year, partial_match=True)
+
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.upper()}_{next_needed_year}','xlsx'], without_domain=False)
+    download_excel_files_from_url(available_links, folder_name)
+    driver.close()
+
+    return available_links
+
 # main function
 if __name__ == "__main__":
     
