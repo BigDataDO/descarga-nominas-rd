@@ -42,6 +42,12 @@ def click_element_by_text(driver, text, sleep_time=3, partial_match=False):
     date_elements[0].click()
     time.sleep(sleep_time)
 
+def click_element_by_other_element(driver, text, element, sleep_time = 3):
+    search_criteria = f"//*[contains(@{element},'{text}')]"
+    date_elements = driver.find_elements(By.XPATH, search_criteria)  
+    date_elements[0].click()
+    time.sleep(sleep_time)          
+
 def find_download_links(content, domain=None):
     """
     Finds all download links for Excel files in the content of a page

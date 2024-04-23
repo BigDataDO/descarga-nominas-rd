@@ -802,8 +802,8 @@ def download_ln():
 
 def download_mivhed():
     listaCategorias = [
-        ##'Nóminas Fijos',
-        ##'Nóminas Pensionados',
+        'Nóminas Fijos',
+        'Nóminas Pensionados',
         'Personal Contratados'
     ]
 
@@ -820,6 +820,16 @@ def download_mivhed():
     driver.close()
     return available_links
 
+def download_mj():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    click_element_by_other_element(driver, f'nominas-de-empleados-{next_needed_year}', 'href')
+    available_links = find_links_matching_all(driver, [f'{next_needed_month_text}-{next_needed_year}'], without_domain=False)
+    download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
 
 # main function
 if __name__ == "__main__":
@@ -839,6 +849,6 @@ if __name__ == "__main__":
                 options.add_argument('--headless')
             # calling the download function
             eval(f"download_{df['nombre_corto'][i].lower()}")()
-        except:
-            logging.error(f'Error procesando {df['nombre_corto'][i]}')
+        except Exception as e:
+            logging.error(f'Error procesando {df['nombre_corto'][i]}', exc_info=True)
             continue    
