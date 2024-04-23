@@ -2,6 +2,7 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from datetime import date
 import re
 import requests
 import pandas as pd
@@ -798,6 +799,27 @@ def download_ln():
     driver.close()
 
     return available_links
+
+def download_mivhed():
+    listaCategorias = [
+        ##'Nóminas Fijos',
+        ##'Nóminas Pensionados',
+        'Personal Contratados'
+    ]
+
+    driver = webdriver.Firefox(options=options)
+    
+    for categoria in listaCategorias:
+        driver.get(base_url)
+        click_element_by_text(driver, categoria)
+        if next_needed_year != date.today().year:
+            click_element_by_text(driver, f' {next_needed_year}',partial_match=True)
+        available_links = find_links_matching_all(driver, [f'{next_needed_month_text}_{next_needed_year}','xlsx'], without_domain=False)            
+        download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
+
 
 # main function
 if __name__ == "__main__":
