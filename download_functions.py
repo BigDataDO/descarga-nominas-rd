@@ -657,35 +657,6 @@ def download_mt():
     driver.close()
     return excel_links
 
-##Funcion en construccion - Inicio ----
-def download_mispas():
-     # Open in browser
-    driver = webdriver.Firefox(options=options)
-    driver.get(base_url)
-    wait = WebDriverWait(driver, 5)
-
-    # Utilizar el método 'presence_of_element_located' para esperar a que el elemento esté presente en el DOM
-    element = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'vc_row wpb_row vc_row-fluid')))
-    time.sleep(4)
-    print(element)
-    # print(driver.page_source)
-    # Click the year
-    click_element_by_text(driver, "Año "+next_needed_year)
-
-    # Click the month
-    click_element_by_text(driver, next_needed_month_text)
-
-    # Find the link to the Excel file
-    content = driver.page_source
-    excel_links = find_links_to_excel_files(content)
-    print(excel_links)
-
-    # Download the Excel file
-    download_excel_files_from_url(excel_links, folder_name)
-    driver.close()
-    return excel_links
-## Funcion en construccion - Fin ----
-
 def download_mimarena():
     list = [
         'Personal en Suplencia',
@@ -830,6 +801,21 @@ def download_mj():
 
     driver.close()
     return available_links
+
+def download_mispas():
+    driver = webdriver.Firefox(options=options)
+    ##driver.implicitly_wait(10);
+    driver.get(base_url)
+
+    click_element_by_text(driver,f'Año {next_needed_year}')
+    click_element_by_text(driver,f'{next_needed_month_text}')
+
+    available_links = find_links_to_excel_files(driver.page_source)
+    download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
+
 
 # main function
 if __name__ == "__main__":
