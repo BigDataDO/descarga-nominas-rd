@@ -816,6 +816,37 @@ def download_mispas():
     driver.close()
     return available_links
 
+def download_mepyd():
+    driver = webdriver.Firefox(options=options)
+    ##driver.implicitly_wait(10);
+    driver.get(base_url)
+
+    all_docs_btn = driver.find_elements(By.XPATH, f"//*[contains(text(),'{next_needed_month_text.upper()} {next_needed_year}')]/parent::li[@class='ext xlsx']")
+       
+    available_links = []
+ 
+    for buttons in all_docs_btn:
+        try:
+            time.sleep(3)
+            buttons.find_element(By.XPATH,'./a').click()
+            time.sleep(3)
+
+            #available_links.extend(find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}-{next_needed_year}','xlsx'], without_domain=False))  
+            available_links.extend(find_links_to_excel_files(driver.page_source))
+            driver.find_element(By.CLASS_NAME,f"wpfd-close").click()
+        except Exception as e:
+            logging.error(f'MEPYD --- Error al intentar hacer click en {buttons.text}', exc_info=True)    
+            continue
+
+    #click_element_by_text(driver,f'NOMINA PERSONAL FIJO {next_needed_month_text.upper()} {next_needed_year}')
+    #click_element_by_text(driver,f'NOMINA PERSONAL FIJO MARZO 2024')
+    #available_links =find_links_to_excel_files(driver.page_source)
+
+    download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
+
 
 # main function
 if __name__ == "__main__":
