@@ -162,9 +162,6 @@ def download_inapa():
     driver.close()
     return available_links
 
-def download_caasd():
-    # In progress
-    return []
 
 # def download_indrhi():
 #     # Open in headless browser
@@ -847,6 +844,19 @@ def download_mepyd():
     driver.close()
     return available_links
 
+def download_caasd():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    click_element_by_text(driver,f"Nomina de Empleados {next_needed_year} ")
+    click_element_by_text(driver,f"Nomina de Empleados {next_needed_month_text} {next_needed_year} ")
+
+    available_links = find_links_to_excel_files(driver.page_source)
+
+    download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return []
 
 # main function
 if __name__ == "__main__":
