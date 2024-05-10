@@ -162,34 +162,6 @@ def download_inapa():
     driver.close()
     return available_links
 
-
-# def download_indrhi():
-#     # Open in headless browser
-#     driver = webdriver.Firefox(options=options)
-#     driver.get(base_url)
-    
-#     # Click the Nomina
-#     click_element_by_text(driver, 'Nóminas Contratados', sleep_time=8)
-
-#     # Click the year
-#     click_element_by_text(driver, "Año "+next_needed_year, sleep_time=8)
-#     print("Año "+next_needed_year)
-
-#     # find the link to the desired document
-#     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
-#                                                                     f'{next_needed_year}',
-#                                                                     'xlsx'])
-#        # Find the link to the Excel file
-#     content = driver.page_source
-#     # print(content)
-#     excel_links = find_links_to_excel_files(content)
-
-#     print(available_links)
-#     print(excel_links)
-    
-#     download_excel_files_from_url(available_links, folder_name)
-#     return available_links
-
 def download_ayuntamientosantiago():
     # Open in browser
     driver = webdriver.Firefox(options=options)
@@ -856,7 +828,42 @@ def download_caasd():
     download_excel_files_from_url(available_links,folder_name)
 
     driver.close()
-    return []
+    return available_links
+
+def download_indrhi():
+    driver = webdriver.Firefox(options=options)
+    carpetas = ['Nómina de Empleados Fijos',
+                'Nóminas Contratados',
+                'Nóminas Seguridad',
+                'Nomina Jornaleros',
+                'Jubilaciones, Pensiones y Retiros']
+    
+    available_links=[]
+
+    for carpeta in carpetas:
+        driver.get(base_url)
+        click_element_by_text(driver,carpeta)
+        ##driver.implicitly_wait(30)
+        ##click_element_by_text(driver,f"{next_needed_year}",partial_match=True)
+        WebDriverWait(driver,30).until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(@title,'{next_needed_year}')]")))
+
+        ##WebDriverWait(driver,30).until(EC.((By.XPATH,f"//div[contains(@class, 'mediaTableWrapper')]")))
+
+        time.sleep(10) ##No encontre otra forma de que se lograse el click
+
+        driver.find_element(By.XPATH, f"//a[contains(@title,'{next_needed_year}')]").click()
+
+        WebDriverWait(driver,30).until(EC.presence_of_all_elements_located((By.XPATH,f"//a[contains(@class, 'downloadlink')]")))
+
+        ##WebDriverWait(driver,100).until(EC.)
+        ##x = driver.find_element(By.XPATH,f"//a[contains(@title,'{next_needed_year}')]")
+        
+        available_links.extend(find_links_matching_all(driver, [f'{next_needed_month_text.lower()}'], without_domain=False))
+
+    download_excel_files_from_url(available_links,folder_name)    
+
+    driver.close()
+    return available_links
 
 # main function
 if __name__ == "__main__":
