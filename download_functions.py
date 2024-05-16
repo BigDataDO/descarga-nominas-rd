@@ -882,6 +882,23 @@ def download_mem():
     driver.close()
     return available_links
 
+def download_mapre():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    driver.find_element(By.XPATH,f"//*[text()='Ministerio Administrativo de la Presidencia (MAPRE)']").click()
+    time.sleep(2)
+    driver.find_element(By.XPATH,f"//*[text()='{next_needed_year}']").click()
+    time.sleep(2)
+    driver.find_element(By.XPATH,f"//*[text()='{next_needed_month_text}']").click()
+    time.sleep(2)
+    available_links = find_links_to_excel_files(driver.page_source)
+
+    download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
+
 
 # main function
 if __name__ == "__main__":
