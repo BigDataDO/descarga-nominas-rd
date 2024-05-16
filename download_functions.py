@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from datetime import date
+from datetime import datetime
 import re
 import requests
 import pandas as pd
@@ -227,30 +228,6 @@ def download_senado():
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
     driver.close()
     return available_links
-        
-# def download_inespre():
-#     # Open in browser
-#     driver = webdriver.Firefox(options=options)
-#     driver.get(base_url)
-#     # Click the year
-#     click_element_by_text(driver, next_needed_year, partial_match=True)
-
-#     # # find the link to the desired document
-#     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
-#                                                                     f'{next_needed_year}',
-#                                                                     'xlsx'])
-    
-#     print(available_links)
- 
-#     # Find the link to the Excel file
-#     content = driver.page_source
-#     # print(available_links)
-#     excel_links = find_links_to_excel_files(content)
-#     print(excel_links)
-#     # Download the Excel file
-#     download_excel_files_from_url(available_links, folder_name, allow_redirects=True)
-#     driver.close()
-#     return available_links
         
 def download_dncd():
     # Open in headless browser
@@ -864,6 +841,47 @@ def download_indrhi():
 
     driver.close()
     return available_links
+
+def download_inespre():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    available_links = find_links_matching_all(driver, [f'{next_needed_month_text.lower()}-{next_needed_year}'], without_domain=False)
+
+    download_excel_files_from_url(available_links,folder_name) 
+
+    driver.close()
+    return available_links
+
+def download_mirex():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    click_element_by_text(driver,f"{next_needed_year}")
+
+def download_mem():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)    
+
+    lista_links = driver.find_elements(By.XPATH, f"//*[contains(text(),'{next_needed_month_text}')]")
+    lista_links[datetime.now().year - int(next_needed_year)].click()
+    time.sleep(3)
+
+    available_links = find_links_to_excel_files(driver.page_source,domain='https://transparencia.mem.gob.do')
+
+    #boton_siguiente = driver.find_element(By.XPATH, f"//*[text()='Siguiente']")
+
+    #while boton_siguiente is not None:
+    #    boton_siguiente.click()
+    #    time.sleep(3)
+    #    available_links.extend(find_links_to_excel_files(driver.page_source))
+    #    boton_siguiente = driver.find_element(By.XPATH, f"//*[text()='Siguiente']")
+
+    download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
+
 
 # main function
 if __name__ == "__main__":
