@@ -899,6 +899,63 @@ def download_mapre():
     driver.close()
     return available_links
 
+def download_minpre():
+    options.set_preference("browser.download.folderList",2)
+    options.set_preference("browser.download.manager.showWhenStarting", False)
+    options.set_preference("browser.download.dir", folder_name)
+    options.set_preference("browser.helperApps.neverAsk.saveToDisk", "application/xls")
+
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    pages = ['mina PROETP',
+             'mina de personal fijo',
+             'mina de personal contratado']
+    
+    ##available_links = []
+
+    for page in pages:
+        time.sleep(10)
+        #click_element_by_text(driver, f"{page} {next_needed_year}",partial_match=True)
+        #click_element_by_text(driver, f"{next_needed_month_text}",partial_match=True)
+        
+        btn = WebDriverWait(driver,10).until(
+            EC.element_to_be_clickable((By.XPATH,f"//*[contains(@title,'{page} {next_needed_year}')]"))
+        )
+        #btn.click()
+        driver.execute_script("arguments[0].click();", btn)
+
+        btn = WebDriverWait(driver,10).until(
+            EC.element_to_be_clickable((By.XPATH,f"//*[contains(@title,'{next_needed_month_text}')]"))
+        )
+        #btn.click()
+        driver.execute_script("arguments[0].click();", btn)
+
+        ##available_links.extend(find_links_to_excel_files(driver.page_source))
+        ##available_links = find_download_links(driver.page_source)
+        ##available_links = find_links_matching_all(driver,f'xls',True)
+        ##download_excel_files_from_url(available_links,folder_name)
+        ##a = driver.find_element(By.XPATH,f"//a[contains(@title,'xls')]")
+        ##link = a.get_attribute('href') 
+        ##filename = a.get_attribute('data-name')
+        ##r = requests.get(link, allow_redirects=True, headers=None,verify=False)
+        ##open(folder_name + '/' + filename, 'wb').write(r.content)  
+
+        time.sleep(5)
+
+        driver.find_element(By.XPATH,f"//a[contains(@title,'xls')]").click()
+
+        time.sleep(2)
+
+        driver.find_element(By.XPATH,f"//*[contains(@title,'Carpeta superior')]").click()
+        time.sleep(5)
+        driver.find_element(By.XPATH,f"//*[contains(@title,'Carpeta superior')]").click()
+        time.sleep(5)
+
+    ##download_excel_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return 1
 
 # main function
 if __name__ == "__main__":
