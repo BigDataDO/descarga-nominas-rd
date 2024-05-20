@@ -834,7 +834,22 @@ def download_mirex():
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
 
-    click_element_by_text(driver,f"{next_needed_year}")
+    btn = WebDriverWait(driver,10).until(
+        EC.element_to_be_clickable((By.XPATH,f"//*[contains(@title,'{next_needed_year}')]"))
+    )
+    driver.execute_script("arguments[0].click();", btn)
+
+    time.sleep(5)
+    
+    available_links = find_links_matching_all(driver,[f"{next_needed_month_text.upper()}",
+                                                      f"{next_needed_year}",
+                                                      f".zip"],
+                                                      without_domain=True)
+    
+    download_zip_files_from_url(available_links, folder_name)
+
+    driver.close()
+    return available_links
 
 def download_mem():
     driver = webdriver.Firefox(options=options)

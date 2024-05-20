@@ -197,6 +197,9 @@ def download_zip_files_from_url(excel_links, folder_name, filename_from_headers=
             
         open(folder_name + '/' + filename, 'wb').write(r.content)
         with zipfile.ZipFile(folder_name + '/' + filename,'r') as zip_ref:
-            zip_ref.extractall(folder_name)
+            ##zip_ref.extractall(folder_name)
+            for file_info in zip_ref.infolist():
+                if file_info.filename.endswith('.xlsx') or file_info.filename.endswith('.xls'):
+                    zip_ref.extract(file_info, folder_name)
             zip_ref.close()
         print("Decargado")        
