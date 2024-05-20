@@ -11,6 +11,7 @@ from utils import *
 import time
 import logging
 
+
 #### Options ####
 # Run browser with no window
 CONF_HEADLESS_BROWSER = False
@@ -664,30 +665,6 @@ def download_iad(): ##INSTITUTO AGRARIO DOMINICANO
 
     return excel_links
 
-# def download_dgii():
-
-#     tipos_pags = ['Contratados','Nombrado','Periodo%20de%20Prueba']
-#     zip_links = []
-
-#     for tipo in tipos_pags:
-#         link = 'https://dgii.gov.do/transparencia/recursosHumanos/nominaEmpleados/Documents/'+next_needed_year+'/'+tipo+'%20'+next_needed_month_text+'%20'+next_needed_year+'.zip'
-#         response = requests.get(link)
-#         if "Página no encontrada" in response.text:
-#             link = 'https://dgii.gov.do/transparencia/recursosHumanos/nominaEmpleados/Documents/'+next_needed_year+'/'+tipo+'%20'+next_needed_month_text+'%20'+next_needed_year+'_N.zip'
-#             responsne = requests.get(link)
-#             if "Página no encontrada" in response.text:
-#                 print("No Zip file found:", link)
-#             else:
-#                 print("Found Zip file:", link)
-#                 zip_links.extend(link)      
-#         else:
-#             print("Found Zip file:", link)  
-#             zip_links.extend(link)    
-
-#     requests.get(zip_links) ### No se si esto es suficiente para descargar
-
-#     return zip_links
-
 def download_mh():
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
@@ -900,6 +877,8 @@ def download_mapre():
     return available_links
 
 def download_minpre():
+    #No se logra descargar con el proceso standard porque que el link es un ajax.php, 
+    #entonces se tiene que hacer click y que se descargue en la carpeta por defecto del navegador
     options.set_preference("browser.download.folderList",2)
     options.set_preference("browser.download.manager.showWhenStarting", False)
     options.set_preference("browser.download.dir", folder_name)
@@ -956,6 +935,20 @@ def download_minpre():
 
     driver.close()
     return 1
+
+def download_dgii():
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+
+    available_links = find_links_matching_all(driver,[f"{next_needed_month_text}",
+                                                      f"{next_needed_year}",
+                                                      f".zip"],
+                                                      without_domain=False)
+
+    download_zip_files_from_url(available_links,folder_name)
+
+    driver.close()
+    return available_links
 
 # main function
 if __name__ == "__main__":

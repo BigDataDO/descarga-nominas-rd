@@ -6,6 +6,7 @@ import requests
 import os
 import re
 import time
+import zipfile
 
 month_names_dict = {
     '01': 'Enero',
@@ -158,3 +159,44 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
             
         open(folder_name + '/' + filename, 'wb').write(r.content)
         print("Decargado")
+
+def download_zip_files_from_url(excel_links, folder_name, filename_from_headers=None, headers=None, allow_redirects=True, split_arg = None):
+    
+    for link in excel_links:
+        print('Downloading Excel file:', link)
+        # Create the folder if it doesn't exist
+        if not os.path.exists(folder_name):
+            os.makedirs(folder_name)
+        # Download the file
+        r = requests.get(link, allow_redirects=allow_redirects, headers=headers,verify=False)
+        # Get the filename from the URL
+
+        # if the file is a PDF, skip it
+        if 'application/pdf' in r.headers.get('content-type'):
+            print('PDF file found, skipping:', link)
+            continue
+
+        if filename_from_headers is None:
+            filename = re.findall(r'/([^/]+)$', link)[0]
+        else:
+            if 'content-disposition' in r.headers:
+                filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
+            elif not allow_redirects:
+                filename = r.headers.get('location').split(split_arg)[1]
+            elif 'officedocument' in r.headers.get('content-type'):
+                filename = re.findall(r'filename="([^"]+)"', r.headers.get('content-type'))[0]
+            else:
+                print('Could not find filename in headers, using URL')
+                filename = re.findall(r'/([^/]+)$', link)[0]
+        
+        # make sure filename is a valid windows/linux filename
+        filename = re.sub(r'[\\/*?:"<>=|]', '', filename)
+
+        if not filename.endswith('.zip'):
+            filename += '.zip'
+            
+        open(folder_name + '/' + filename, 'wb').write(r.content)
+        with zipfile.ZipFile(folder_name + '/' + filename,'r') as zip_ref:
+            zip_ref.extractall(folder_name)
+            zip_ref.close()
+        print("Decargado")        
