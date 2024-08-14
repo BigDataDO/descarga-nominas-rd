@@ -428,12 +428,6 @@ def download_mopc():
     driver.close()
     return available_links
 
-def download_ln():
-    # Development paused because the site is down
-    response = requests.get(f'https://loterianacional.gob.do/transparencia/recursos-humanos/nomina-de-empleados/periodo?p={next_needed_year}')
-    available_links = find_links_matching_all(response, [f'{next_needed_month_text.upper()}',
-                                                         f'{next_needed_year}'])
-
 def download_feda():
     # Open in headless browser
     driver = webdriver.Firefox(options=options)
@@ -690,7 +684,7 @@ def download_ln():
 
     click_element_by_text(driver, next_needed_year, partial_match=True)
 
-    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.upper()}_{next_needed_year}','xlsx'], without_domain=False)
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.upper()}_{next_needed_year}','xlsx'], without_domain=True)
     download_excel_files_from_url(available_links, folder_name)
     driver.close()
 
@@ -801,7 +795,7 @@ def download_indrhi():
         click_element_by_text(driver,carpeta)
         ##driver.implicitly_wait(30)
         ##click_element_by_text(driver,f"{next_needed_year}",partial_match=True)
-        WebDriverWait(driver,30).until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(@title,'{next_needed_year}')]")))
+        WebDriverWait(driver,10).until(EC.element_to_be_clickable((By.XPATH, f"//a[contains(@title,'Año {next_needed_year}')]")))
 
         ##WebDriverWait(driver,30).until(EC.((By.XPATH,f"//div[contains(@class, 'mediaTableWrapper')]")))
 
@@ -809,7 +803,7 @@ def download_indrhi():
 
         driver.find_element(By.XPATH, f"//a[contains(@title,'{next_needed_year}')]").click()
 
-        WebDriverWait(driver,30).until(EC.presence_of_all_elements_located((By.XPATH,f"//a[contains(@class, 'downloadlink')]")))
+        WebDriverWait(driver,10).until(EC.presence_of_all_elements_located((By.XPATH,f"//a[contains(@class, 'downloadlink')]")))
 
         ##WebDriverWait(driver,100).until(EC.)
         ##x = driver.find_element(By.XPATH,f"//a[contains(@title,'{next_needed_year}')]")
@@ -825,7 +819,7 @@ def download_inespre():
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
 
-    available_links = find_links_matching_all(driver, [f'{next_needed_month_text.lower()}-{next_needed_year}'], without_domain=False)
+    available_links = find_links_matching_all(driver, [f'{next_needed_month_text.lower()}-{next_needed_year}'], without_domain=True)
 
     download_excel_files_from_url(available_links,folder_name) 
 
@@ -1024,10 +1018,10 @@ def download_ma():
     driver = webdriver.Firefox(options=options)
     driver.get(base_url)
     # Click the year
-    click_element_by_text(driver, next_needed_year,True)
+    click_element_by_text(driver, next_needed_year,partial_match=True)
 
     # Click the month
-    click_element_by_text(driver, next_needed_month_text)
+    click_element_by_text(driver, next_needed_month_text,partial_match=True)
 
     subfolder = ['regional-central','regional-norte','sede-central']
     for folder in subfolder:

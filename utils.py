@@ -35,7 +35,7 @@ def click_element_by_text(driver, text, sleep_time=3, partial_match=False, list_
     """
     if partial_match:
         search_criteria = f"//*[contains(text(),'{text}')]"
-    if list_match:
+    elif list_match:
         text_list = text.split(",")
         search_criteria = "|".join([f"//*[contains(text(), '{e}')]" for e in text_list])
     else:
