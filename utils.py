@@ -24,7 +24,7 @@ month_names_dict = {
 }
 
 
-def click_element_by_text(driver, text, sleep_time=3, partial_match=False):
+def click_element_by_text(driver, text, sleep_time=3, partial_match=False, list_match=False):
     """
     Clicks an element in the page by its text
     :param driver: Selenium driver
@@ -35,6 +35,9 @@ def click_element_by_text(driver, text, sleep_time=3, partial_match=False):
     """
     if partial_match:
         search_criteria = f"//*[contains(text(),'{text}')]"
+    if list_match:
+        text_list = text.split(",")
+        search_criteria = "|".join([f"//*[contains(text(), '{e}')]" for e in text_list])
     else:
         search_criteria = f"//*[text()='{text}']"
     date_elements = driver.find_elements(By.XPATH, search_criteria)

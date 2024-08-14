@@ -147,13 +147,14 @@ def download_inapa():
     click_element_by_text(driver, next_needed_year)
 
     # Click the month
-    click_element_by_text(driver, next_needed_month_text.upper())
+    click_element_by_text(driver, f'{next_needed_month_text.upper()},{next_needed_month_text.lower()},{next_needed_month_text}', list_match=True)
 
     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
                                                         f'{next_needed_year}',
                                                         'download'])
     download_excel_files_from_url(available_links, folder_name, filename_from_headers=True)
     # Click Nominas Adicionales
+    time.sleep(3)
     click_element_by_text(driver, 'NOMINAS ADICIONALES')
 
     available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}',
@@ -476,6 +477,7 @@ def download_mitur():
 
     # Click the month
     click_element_by_text(driver, next_needed_month_text)
+    time.sleep(3)
 
     # Find the link to the Excel file
     content = driver.page_source
@@ -676,7 +678,7 @@ def download_mh():
     ##x = driver.find_elements(By.XPATH, f"//*[contains(text(),'{next_needed_month_text}')]")
     ##click_element_by_text(x, 'Ver Documentos', partial_match=True)
 
-    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}-{next_needed_year}','xlsx'], without_domain=True)
+    available_links = find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}-{next_needed_year}','xls'], without_domain=True)
     download_excel_files_from_url(available_links, folder_name)
     driver.close()
 
@@ -964,6 +966,157 @@ def download_dgii():
 
     driver.close()
     return available_links
+
+def download_coraasan():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, f'Nómina {next_needed_year} (CORAASAN)')
+
+    # Click folder
+    click_element_by_text(driver, f'Nómina empleados fijos')
+
+    excel_links = find_links_matching_all(driver
+                                          ,[f'nomina-{next_needed_month_text.lower()}-{next_needed_year}'
+                                          ,'xlsx'])
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+
+    driver.close()
+    return excel_links
+
+def download_propeep():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get( f'{base_url}/nonima-{next_needed_year}' )
+
+    excel_links = find_links_matching_all(driver
+                                          ,[f'personal-fijo'
+                                          ,f'{next_needed_month_text.lower()}'
+                                          ,'xlsx'])
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+
+    driver.close()
+    return excel_links
+
+def download_map():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    excel_links = find_links_matching_all(driver
+                                          ,[f'empleados-fijo'
+                                          ,f'{next_needed_year}'
+                                          ,f'{next_needed_month_text.lower()}'
+                                          ,'xlsx']
+                                          ,True)
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+    driver.close()
+    return excel_links
+
+def download_ma():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year,True)
+
+    # Click the month
+    click_element_by_text(driver, next_needed_month_text)
+
+    subfolder = ['regional-central','regional-norte','sede-central']
+    for folder in subfolder:
+        #driver.get(f'{base_url}/{folder}')
+        # Click the year
+        click_element_by_text(driver, folder, partial_match=True)
+        excel_links = find_links_matching_all(driver
+                                            ,[f'{folder}'
+                                            ,f'{next_needed_year}'
+                                            ,f'{next_needed_month_text.lower()}'
+                                            ,'xlsx']
+                                            ,True)
+        download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+    driver.close()
+    return excel_links
+
+def download_minerd():
+   # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get( f'{base_url}/{next_needed_year}/{next_needed_month_text.lower()}/listados' )
+
+    excel_links = find_links_matching_all(driver
+                                            ,[f'{next_needed_year}'
+                                            ,f'{next_needed_month_text.lower()}'
+                                            ,'xlsx']
+                                            ,True)
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+
+    driver.close()
+    return excel_links
+
+def download_mescyt():
+   # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get( f'{base_url}/personal-fijo/' )
+
+        # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+    click_element_by_text(driver, f'{next_needed_month} - {next_needed_month_text.lower()}')
+
+    excel_links = find_links_matching_all(driver
+                                            ,[f'{next_needed_year}'
+                                            ,f'{next_needed_month_text.lower()}'
+                                            ,'xlsx']
+                                            ,True)
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+
+    driver.close()
+    return excel_links
+
+def download_sb():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get( f'{base_url}?anio={next_needed_year}&mes={next_needed_month_text}' )
+
+    click_element_by_text(driver, f'{next_needed_month_text} {next_needed_year}')
+
+    excel_links = find_links_matching_all(driver
+                                            ,[f'{next_needed_year}'
+                                            ,f'{next_needed_month_text.lower()}'
+                                            ,'xlsx']
+                                            )
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+
+    driver.close()
+    return excel_links
+
+def download_superseguro():
+    # Open in browser
+    driver = webdriver.Firefox(options=options)
+    driver.get(base_url)
+    # Click the year
+    click_element_by_text(driver, next_needed_year)
+
+    # Click the month
+
+    click_element_by_text(driver, next_needed_month_text)
+
+    # Find the link to the Excel file
+    excel_links = find_links_matching_all(driver
+                                            ,[f'{next_needed_year}'
+                                            ,f'{next_needed_month_text.lower()}'
+                                            ,'xlsx']
+                                            )
+    download_excel_files_from_url(excel_links, folder_name, filename_from_headers=True)
+    driver.close()
+    return excel_links
 
 # main function
 if __name__ == "__main__":
