@@ -373,7 +373,7 @@ def download_micm():
     click_element_by_text(driver, "Nómina " +next_needed_year)
 
     # Click the month
-    click_element_by_text(driver, next_needed_month_text + " ")
+    click_element_by_text(driver, next_needed_month_text, partial_match=True)
 
      # Find the link to the Excel file
     content = driver.page_source
@@ -740,26 +740,20 @@ def download_mepyd():
     ##driver.implicitly_wait(10);
     driver.get(base_url)
 
-    all_docs_btn = driver.find_elements(By.XPATH, f"//*[contains(text(),'{next_needed_month_text.upper()} {next_needed_year}')]/parent::li[@class='ext xlsx']")
-       
+    cat_list = ['Fijos', 'Vigilantes', 'Contratados temporeros', 'Caracter eventual']
+
     available_links = []
- 
-    for buttons in all_docs_btn:
-        try:
-            time.sleep(3)
-            buttons.find_element(By.XPATH,'./a').click()
-            time.sleep(3)
 
-            #available_links.extend(find_links_matching_all(driver,  [f'{next_needed_month_text.lower()}-{next_needed_year}','xlsx'], without_domain=False))  
-            available_links.extend(find_links_to_excel_files(driver.page_source))
-            driver.find_element(By.CLASS_NAME,f"wpfd-close").click()
-        except Exception as e:
-            logging.error(f'MEPYD --- Error al intentar hacer click en {buttons.text}', exc_info=True)    
-            continue
-
-    #click_element_by_text(driver,f'NOMINA PERSONAL FIJO {next_needed_month_text.upper()} {next_needed_year}')
-    #click_element_by_text(driver,f'NOMINA PERSONAL FIJO MARZO 2024')
-    #available_links =find_links_to_excel_files(driver.page_source)
+    for cat in cat_list:
+        click_element_by_text(driver, f"{next_needed_month_text}")
+        time.sleep(3)
+        click_element_by_text(driver, cat)
+        btn = driver.find_elements(By.XPATH, f"//*[contains(@class,'ext xlsx')]")  
+        btn[0].find_element(By.XPATH, ".//a").click()
+        time.sleep(3)
+        available_links.extend(find_links_to_excel_files(driver.page_source))
+        driver.get(base_url)
+        time.sleep(3)
 
     download_excel_files_from_url(available_links,folder_name)
 

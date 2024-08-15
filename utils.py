@@ -148,8 +148,8 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
                 filename = r.headers.get('content-disposition').split('filename=')[1].replace('"','')
             elif not allow_redirects:
                 filename = r.headers.get('location').split(split_arg)[1]
-            elif 'officedocument' in r.headers.get('content-type'):
-                filename = re.findall(r'filename="([^"]+)"', r.headers.get('content-type'))[0]
+            ##elif 'officedocument' in r.headers.get('content-type'):
+            ##    filename = re.findall(r'filename="([^"]+)"', r.headers.get('content-type'))[0]
             else:
                 print('Could not find filename in headers, using URL')
                 filename = re.findall(r'/([^/]+)$', link)[0]
