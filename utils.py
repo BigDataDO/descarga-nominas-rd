@@ -137,7 +137,7 @@ def download_excel_files_from_url(excel_links, folder_name, filename_from_header
         # Get the filename from the URL
 
         # if the file is a PDF, skip it
-        if 'application/pdf' in r.headers.get('content-type'):
+        if 'application/pdf' in r.headers.get('content-type' or ''):
             print('PDF file found, skipping:', link)
             continue
 
